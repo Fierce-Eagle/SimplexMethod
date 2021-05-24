@@ -32,8 +32,6 @@ namespace Form_ISO_Lr6
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.freeVariableButton = new System.Windows.Forms.Button();
             this.dataGridView = new System.Windows.Forms.DataGridView();
-            this.freeMemberCollumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Sign = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.basisVariableButton = new System.Windows.Forms.Button();
             this.solutionButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -44,6 +42,8 @@ namespace Form_ISO_Lr6
             this.label2 = new System.Windows.Forms.Label();
             this.removeBaseVariableButton = new System.Windows.Forms.Button();
             this.removeFreeVariableButton = new System.Windows.Forms.Button();
+            this.freeMemberCollumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Sign = new System.Windows.Forms.DataGridViewComboBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -71,23 +71,6 @@ namespace Form_ISO_Lr6
             this.dataGridView.RowTemplate.Height = 25;
             this.dataGridView.Size = new System.Drawing.Size(434, 188);
             this.dataGridView.TabIndex = 1;
-            // 
-            // freeMemberCollumn
-            // 
-            this.freeMemberCollumn.FillWeight = 80F;
-            this.freeMemberCollumn.HeaderText = "Свободные члены";
-            this.freeMemberCollumn.Name = "freeMemberCollumn";
-            this.freeMemberCollumn.Width = 80;
-            // 
-            // Sign
-            // 
-            this.Sign.FillWeight = 65F;
-            this.Sign.HeaderText = "Знак";
-            this.Sign.Items.AddRange(new object[] {
-            "=>",
-            "<="});
-            this.Sign.Name = "Sign";
-            this.Sign.Width = 65;
             // 
             // basisVariableButton
             // 
@@ -143,6 +126,7 @@ namespace Form_ISO_Lr6
             // 
             // dataGridViewComboBoxColumn1
             // 
+            this.dataGridViewComboBoxColumn1.DisplayStyleForCurrentCellOnly = true;
             this.dataGridViewComboBoxColumn1.FillWeight = 65F;
             this.dataGridViewComboBoxColumn1.HeaderText = "Критерий опт.";
             this.dataGridViewComboBoxColumn1.Items.AddRange(new object[] {
@@ -188,6 +172,24 @@ namespace Form_ISO_Lr6
             this.removeFreeVariableButton.UseVisualStyleBackColor = true;
             this.removeFreeVariableButton.Click += new System.EventHandler(this.RemoveFreeVariableButton_Click);
             // 
+            // freeMemberCollumn
+            // 
+            this.freeMemberCollumn.FillWeight = 80F;
+            this.freeMemberCollumn.HeaderText = "Свободные члены";
+            this.freeMemberCollumn.Name = "freeMemberCollumn";
+            this.freeMemberCollumn.Width = 80;
+            // 
+            // Sign
+            // 
+            this.Sign.FillWeight = 65F;
+            this.Sign.HeaderText = "Знак";
+            this.Sign.Items.AddRange(new object[] {
+            "=>",
+            "<=",
+            "="});
+            this.Sign.Name = "Sign";
+            this.Sign.Width = 65;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -225,10 +227,10 @@ namespace Form_ISO_Lr6
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button removeBaseVariableButton;
         private System.Windows.Forms.Button removeFreeVariableButton;
-        private System.Windows.Forms.DataGridViewTextBoxColumn freeMemberCollumn;
-        private System.Windows.Forms.DataGridViewComboBoxColumn Sign;
         private System.Windows.Forms.DataGridViewComboBoxColumn dataGridViewComboBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn FreeMember;
+        private System.Windows.Forms.DataGridViewTextBoxColumn freeMemberCollumn;
+        private System.Windows.Forms.DataGridViewComboBoxColumn Sign;
     }
 }
 

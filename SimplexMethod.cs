@@ -10,50 +10,96 @@ namespace Form_ISO_Lr6
     {
         public int FreeVariableCount { get; set; }
         public int BasicVariableCount { get; set; }
-        private double[,] table;
-        private int[] freeVariableArray;
+        public int ArtificialVariableCount { get; set; }
+        private double[,] _table;
+        private int[] _freeVariableArray;
+        private double[] _targetFunctionArray;
 
 
-        public void Init(double[,] array)
+        public void Init(double[,] array, int[] freeVariableArray)
         {
-            freeVariableArray = new int[FreeVariableCount];
-            table = new double[array.GetLength(0), array.GetLength(1) + 1];
+            _freeVariableArray = freeVariableArray;
+            _table = new double[array.GetLength(0), array.GetLength(1) + 1];
+            _targetFunctionArray = new double[array.GetLength(1)];
 
-            for (int i = 0; i < array.GetLength(0); i++)           
+            int lastRow = array.GetLength(0) - 1;
+            int artificialVariableStart = BasicVariableCount + FreeVariableCount + 1;
+            // заполнение таблицы
+            for (int i = 0; i < lastRow; i++)           
                 for (int j = 0; j < array.GetLength(1); j++)               
-                    table[i, j] = array[i, j];  
-            
-            for (int i = 0; i < FreeVariableCount; i++)          
-                freeVariableArray[i] = BasicVariableCount + i;           
+                    _table[i, j] = array[i, j];
+            // подмена функции цели
+            for (int i = 0; i < array.GetLength(1); i++)
+            {
+                _targetFunctionArray[i] = array[lastRow, i];
+                if (i >= artificialVariableStart)               
+                    _table[lastRow, i] = 1;
+                else
+                    _table[lastRow, i] = 0;
+            }
+                                 
         }
         /// <summary>
-        /// Найти позицию минимального числа в функции цели
+        /// Найти позицию минимального числа
         /// </summary>  
         /// <returns></returns>
         private int FindMainCollumn()
-        {           
+        {
+            //int startArtificialVariable = BasicVariableCount + FreeVariableCount;
+            //for (int i = 0; i < FreeVariableCount; i++)
+            //    if (_freeVariableArray[i] > startArtificialVariable) // в базисе присутствуют искусственные переменные
+            //        return FindMainCollumnInGradeArray();
+            //return FindMainCollumnInTargetFunction();
             int colsize = BasicVariableCount + FreeVariableCount;
             int minPosition = 1;
-            for (int j = 2; j <= colsize; j++)           
-                if (table[FreeVariableCount, j] < table[FreeVariableCount, minPosition])               
-                    minPosition = j; 
-            
+            for (int j = 2; j <= colsize; j++)
+                if (_table[FreeVariableCount, j] < _table[FreeVariableCount, minPosition])
+                    minPosition = j;
+
             return minPosition;
         }
         ///// <summary>
-        ///// Найти позицию минимального числа в оценочных отношениях
+        ///// Поиск минимального числа в функции цели
         ///// </summary>
         ///// <returns></returns>
+        //private int FindMainCollumnInTargetFunction()
+        //{
+        //    int colsize = BasicVariableCount + FreeVariableCount;
+        //    int minPosition = 1;
+        //    for (int j = 2; j <= colsize; j++)
+        //        if (_table[FreeVariableCount, j] < _table[FreeVariableCount, minPosition])
+        //            minPosition = j;
+
+        //    return minPosition;
+        //}
+        ///// <summary>
+        ///// Поиск минимального числа в оценочном массиве
+        ///// </summary>
+        ///// <returns></returns>
+        //private int FindMainCollumnInGradeArray()
+        //{
+        //    int minPosition = 1;
+        //    for (int i = 2; i < _gradeArray.Length; i++)
+        //    {
+        //        if (_gradeArray[i] < _gradeArray[minPosition])
+        //            minPosition = i;
+        //    }
+        //    return minPosition;
+        //}
+        /// <summary>
+        /// Найти позицию минимального числа в оценочных отношениях
+        /// </summary>
+        /// <returns></returns>
         private int FindMainRow()
         {
-            int valueRelationCol = table.GetLength(1) - 1; // столбец с оценочными отношениями         
+            int valueRelationCol = _table.GetLength(1) - 1; // столбец с оценочными отношениями         
             int minPosition = -1;
             double min = Double.MaxValue;
             for (int i = 0; i < FreeVariableCount; i++)
             {
-                if (table[i, valueRelationCol] < min && table[i, valueRelationCol] > 0)
+                if (_table[i, valueRelationCol] < min && _table[i, valueRelationCol] > 0)
                 {
-                    min = table[i, valueRelationCol];
+                    min = _table[i, valueRelationCol];
                     minPosition = i;
                 }
             }
@@ -68,7 +114,7 @@ namespace Form_ISO_Lr6
             int colSize = BasicVariableCount + FreeVariableCount + 1;
             for (int i = 0; i < colSize; i++)
             {
-                if (table[FreeVariableCount, i] < 0)
+                if (_table[FreeVariableCount, i] < 0)
                 {
                     return false;
                 }
@@ -83,26 +129,26 @@ namespace Form_ISO_Lr6
         /// <param name="col">столбец с нужным коэффициентом</param>
         private void DivStrOnRoutine(int row, int col)
         {
-            double devision = table[row, col];
-            int temp = table.GetLength(1) - 1; // чтобы не трогать столбец с оценочными отношениями
+            double devision = _table[row, col];
+            int temp = _table.GetLength(1) - 1; // чтобы не трогать столбец с оценочными отношениями
             for (int i = 0; i < temp; i++)
             {
-                table[row, i] /= devision;
+                _table[row, i] /= devision;
             }
         }
 
         private void SubOtherStr(int mainRow, int mainCol)
         {
             double routine;
-            int valueRelationCol = table.GetLength(1) - 1;
-            for (int i = 0; i < table.GetLength(0); i++)
+            int valueRelationCol = _table.GetLength(1) - 1;
+            for (int i = 0; i < _table.GetLength(0); i++)
             {
                 if (i == mainRow)
                     continue;
-                routine = table[i, mainCol];
+                routine = _table[i, mainCol];
                 for (int j = 0; j < valueRelationCol; j++)
                 {
-                    table[i, j] -= table[mainRow, j] * routine;
+                    _table[i, j] -= _table[mainRow, j] * routine;
                 }
             }
         }
@@ -113,13 +159,13 @@ namespace Form_ISO_Lr6
         /// <param name="mainCol"></param>
         private void FillValueRelationCollumn(int mainCol)
         {
-            int valueRelationCol = table.GetLength(1) - 1;           
+            int valueRelationCol = _table.GetLength(1) - 1;           
             for (int i = 0; i < FreeVariableCount; i++)
             {
-                if (table[i, mainCol] <= 0 || table[i, 0] < 0)
-                    table[i, valueRelationCol] = Int32.MaxValue;
+                if (_table[i, mainCol] <= 0 || _table[i, 0] < 0)
+                    _table[i, valueRelationCol] = Int32.MaxValue;
                 else
-                    table[i, valueRelationCol] = table[i, 0] / table[i, mainCol];
+                    _table[i, valueRelationCol] = _table[i, 0] / _table[i, mainCol];
             }
         }
 
@@ -129,7 +175,51 @@ namespace Form_ISO_Lr6
         /// <returns></returns>
         public string Solution()
         {
+            int valueRelationCol = _table.GetLength(1) - 1;
+
+
             int mainRow, mainCol;
+
+            // заполнить массив оценок
+            FillGradeArray();
+            while (!IsSolution())
+            {
+                // найти лидирующий столбец
+                mainCol = FindMainCollumn();
+                FillValueRelationCollumn(mainCol);
+                // найти лидирующую строку
+                mainRow = FindMainRow();
+                DivStrOnRoutine(mainRow, mainCol);
+                SubOtherStr(mainRow, mainCol);
+                //
+                double routine = _targetFunctionArray[mainCol];
+                for (int j = 0; j < valueRelationCol; j++)
+                {
+                    _targetFunctionArray[j] -= _table[mainRow, j] * routine;
+                }
+                _freeVariableArray[mainRow] = mainCol - 1;
+            }
+            // если остались ненулевые искусственные переменные
+            if (!IsNull(_table[_table.GetLength(0) - 1, 0]))
+                return "Решений нет!";
+
+
+
+            for (int i = 1; i <= BasicVariableCount /*+ FreeVariableCount + 1*/; i++)
+            {
+                if (_targetFunctionArray[i] < 0)
+                {
+                    if (Find(_freeVariableArray, i - 1) == -1 && _table[_table.GetLength(0) - 1, i] > 0 && IsNull(_table[_table.GetLength(0) - 1, i])) // если элемента нет в массиве
+                        _targetFunctionArray[i] = 0; // то он не базисный и его можно вычеркнуть
+                   // ChangeGradeFunctionOnTargetFunction();
+                   // return GetResult();
+                }
+            }
+
+
+
+            ChangeGradeFunctionOnTargetFunction();
+
             while (!IsSolution())
             {
                 mainCol = FindMainCollumn();
@@ -137,20 +227,88 @@ namespace Form_ISO_Lr6
                 mainRow = FindMainRow();
                 DivStrOnRoutine(mainRow, mainCol);
                 SubOtherStr(mainRow, mainCol);
-                freeVariableArray[mainRow] = mainCol - 1; 
+                _freeVariableArray[mainRow] = mainCol - 1; 
             }
             return GetResult();
         }
 
+        private bool IsNull(double item)
+        {
+            if (item < 0.00001 || item > -0.00001)
+                return true;
+            return false;
+        }
+
+        private void ChangeGradeFunctionOnTargetFunction()
+        {
+            int length = _table.GetLength(1) - 1;
+            int lastRow = _table.GetLength(0) - 1;
+            /*
+             * int routine = 0;
+             * for (int j = 0; j < length; j++)
+            {
+                for (int i = 0; i < FreeVariableCount; i++)
+                {
+                    if (_freeVariableArray[i] < BasicVariableCount)
+                        _targetFunctionArray[j] -= _table[i, j] * ; // проходить нужно по всей строке олух и домножить не забудь!
+                }
+            }*/
+
+
+         
+
+            // подмена
+            for (int i = 0; i < length; i++)           
+                _table[lastRow, i] = _targetFunctionArray[i];            
+        }
+
+        /// <summary>
+        /// Заполняет массив оценок
+        /// </summary>
+        private void FillGradeArray()
+        {
+            int length = _table.GetLength(1) - 1;
+            int startArtificialVariable = BasicVariableCount + FreeVariableCount;
+            int lastRow = _table.GetLength(0) - 1;
+            for (int j = 0; j < length; j++)
+            {               
+                for (int i = 0; i < FreeVariableCount; i++)
+                {
+                    if (_freeVariableArray[i] > startArtificialVariable)
+                        _table[lastRow, j] -= _table[i, j];
+                }
+            }
+        }
+
+        private int Find(int[] array, int index)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] == index)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
         private string GetResult()
         {
             string result = "";
-            for (int i = 0; i < FreeVariableCount; i++)
+            int temp;
+            for (int i = 0; i < BasicVariableCount; i++)
             {
-                if (freeVariableArray[i] < BasicVariableCount)
-                    result += "X" + (freeVariableArray[i] + 1) + " = " + table[i, 0] + "\t";
+                temp = Find(_freeVariableArray, i);
+                if (temp == -1)
+                    result += "X" + (i + 1) + " = 0\t";
+                else
+                    result += "X" + (i + 1) + " = " + _table[temp, 0] + "\t";
             }
-            result += "F = " + table[FreeVariableCount, 0];
+           // for (int i = 0; i < FreeVariableCount; i++)
+            //{
+            //    if (_freeVariableArray[i] < BasicVariableCount)
+            //        result += "X" + (_freeVariableArray[i] + 1) + " = " + _table[i, 0] + "\t";
+            //}
+            result += "F = " + _table[FreeVariableCount, 0];
             return result;
         }
     }
